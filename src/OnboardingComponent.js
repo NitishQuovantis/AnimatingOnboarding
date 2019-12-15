@@ -1,15 +1,74 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, Animated} from 'react-native';
 import LottieView from 'lottie-react-native';
 
 export default class OnboardingComponent extends Component {
+  static getDerivedStateFromProps(props, state) {
+    if (state.play === props.play && state.offset === props.offset) {
+      return state;
+    }
+
+    if (state.play === props.play && state.offset !== props.offset) {
+      return {...state, offset: props.offset};
+    }
+
+    return {
+      ...props,
+      isAnimating: true,
+    };
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ...props,
+      isAnimating: props.play,
+    };
+
+    this.progress = new Animated.Value(0);
+    this.startAnimation();
+  }
+
+  componentDidUpdate(newProps) {
+    if (this.props.play === newProps.play) {
+      return;
+    }
+
+    this.startAnimation();
+  }
+
+  startAnimation = () => {
+    Animated.timing(this.progress, {
+      toValue: this.props.finalOffset,
+      duration: 3000,
+    }).start(() => {
+      this.setState({isAnimating: false});
+    });
+  };
+
   render() {
-    const {title, desc, animation} = this.props.data;
+    const {animation, title, desc} = this.state.data;
+    const {isAnimating, play} = this.state;
+
+    let offSet = 0;
+
+    if (!play) {
+      offSet = 0;
+      this.progress.setValue(0);
+    } else {
+      offSet = 0.75 + this.state.offset / 4;
+    }
+
+    console.log(title, isAnimating, offSet);
 
     return (
       <View style={[style.containerStyle]}>
         <View style={[style.lottieStyle]}>
-          <LottieView source={animation} autoPlay loop />
+          <LottieView
+            source={animation}
+            progress={isAnimating ? this.progress : offSet}
+          />
         </View>
         <Text style={style.walkThroughHeadingTextStyle}>{title}</Text>
 

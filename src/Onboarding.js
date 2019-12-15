@@ -34,20 +34,48 @@ export default class Onboarding extends Component {
     ];
   }
 
+  state = {
+    offset: 0,
+    selectedPage: 0,
+    isScrollEnabled: true,
+  };
+
   render() {
     return (
       <ViewPager
         style={[style.pagerStyle]}
         onPageScroll={event => {
-          console.log(event.nativeEvent);
+          const {offset} = event.nativeEvent;
+
+          if (offset < 0) {
+            return;
+          }
+
+          this.setState({offset: offset});
         }}
         onPageSelected={event => {
-          console.log('Page selected', event.nativeEvent);
+          const page = event.nativeEvent.position;
+          this.setState({selectedPage: page});
         }}
         showPageIndicator>
-        <OnboardingComponent data={this.OBData[0]} />
-        <OnboardingComponent data={this.OBData[1]} />
-        <OnboardingComponent data={this.OBData[2]} />
+        <OnboardingComponent
+          data={this.OBData[0]}
+          play={this.state.selectedPage === 0}
+          offset={this.state.selectedPage === 0 ? this.state.offset : 0}
+          finalOffset={0.75}
+        />
+        <OnboardingComponent
+          data={this.OBData[1]}
+          play={this.state.selectedPage === 1}
+          offset={this.state.selectedPage === 1 ? this.state.offset : 0}
+          finalOffset={0.75}
+        />
+        <OnboardingComponent
+          data={this.OBData[2]}
+          play={this.state.selectedPage === 2}
+          offset={this.state.selectedPage === 2 ? this.state.offset : 0}
+          finalOffset={1}
+        />
       </ViewPager>
     );
   }
